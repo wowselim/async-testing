@@ -10,7 +10,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -19,10 +21,24 @@ import java.util.concurrent.TimeUnit;
 
 @ExtendWith(VertxExtension.class)
 public class JavaHttpServerTest {
+  private String deploymentId;
+
+  @BeforeEach
+  void deployVerticle(Vertx vertx, VertxTestContext testContext) {
+    vertx.deployVerticle(new MainVerticle(), testContext.succeeding(deploymentId -> {
+      this.deploymentId = deploymentId;
+      testContext.completeNow();
+    }));
+  }
+
+  @AfterEach
+  void undeployVerticle(Vertx vertx, VertxTestContext testContext) {
+    vertx.undeploy(deploymentId, testContext.succeedingThenComplete());
+  }
+
   @Test
   @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
   void service_is_healthy(Vertx vertx, VertxTestContext testContext) {
-    vertx.deployVerticle(new MainVerticle());
     HttpClient httpClient = vertx.createHttpClient();
 
     httpClient.request(HttpMethod.GET, 8080, "localhost", "/health")
