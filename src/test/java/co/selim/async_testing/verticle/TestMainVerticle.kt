@@ -13,7 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 class TestMainVerticle(vertx: Vertx) : AsyncTest(vertx, MainVerticle::class) {
 
   @Test
-  fun `service is healthy when deployed`(vertx: Vertx) = runTest {
+  fun `service is healthy when deployed`() = runTest {
     val request = httpClient.request(HttpMethod.GET, 8080, "localhost", "/health").await()
     val response = request.send().await()
     val responseJson = response.body().await().toJsonObject()
