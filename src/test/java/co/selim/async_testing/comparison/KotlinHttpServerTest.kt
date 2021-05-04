@@ -22,13 +22,12 @@ class KotlinHttpServerTest {
 
   @AfterEach
   fun undeployVerticle(vertx: Vertx): Unit = runBlocking(vertx.dispatcher()) {
-    vertx.undeploy(deploymentId)
+    vertx.undeploy(deploymentId).await()
   }
 
   @Test
   @Timeout(5, unit = TimeUnit.SECONDS)
   fun `service is healthy`(vertx: Vertx): Unit = runBlocking(vertx.dispatcher()) {
-    vertx.deployVerticle(MainVerticle())
     val httpClient = vertx.createHttpClient()
 
     val request = httpClient.request(HttpMethod.GET, 8080, "localhost", "/health").await()
